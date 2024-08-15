@@ -9,7 +9,7 @@ namespace CLogica.Implementations
 {
         public class PersonaLogic : IPersonaLogic
     {
-        IPersonaRepository _personaRepository;
+        private IPersonaRepository _personaRepository;
         public PersonaLogic(IPersonaRepository personaRepository) {
             _personaRepository = personaRepository;
         }

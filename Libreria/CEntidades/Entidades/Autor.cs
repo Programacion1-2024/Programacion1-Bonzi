@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CEntidades.Entidades
 {
-    public class Autor
+    public class Autor : Persona
     {
         public int IdAutor { get; set; }
         public string Biografia { get; set; }
