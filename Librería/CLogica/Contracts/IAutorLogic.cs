@@ -9,9 +9,9 @@ namespace CLogica.Contracts
 
         void AltaAutor(string nombre, string apellido, string nacionalidad, string email, string telefono, string biografia);
 
-        void ActualizarAutor(string documento, Autor autorActualizar);
+        void ActualizarAutor(int id, string nombre, string apellido, string nacionalidad, string email, string telefono, string biografia);
 
-        void EliminarAutor(string documento);
+        void EliminarAutor(string id);
 
 
     }

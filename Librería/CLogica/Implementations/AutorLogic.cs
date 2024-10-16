@@ -25,7 +25,7 @@ namespace CLogica.Implementations
 
         public List<dynamic> ObtenerAutoresParaListado()
         {
-            return _autorRepository.ObtenerAutores().Select(a => new { IdAutor = a.IdAutor, Nombre = a.Persona.Nombre, Apellido = a.Persona.Apellido, Telefono = a.Persona.Telefono, Nacionalidad = a.Persona.Nacionalidad, Email = a.Persona.Email, Biografia = a.Biografia }).ToList<dynamic>();
+            return _autorRepository.ObtenerAutores().Select(a => new { IdAutor = a.IdAutor, Nombre = a.Persona.Nombre, Apellido = a.Persona.Apellido, Nacionalidad = a.Persona.Nacionalidad, Email = a.Persona.Email, Telefono = a.Persona.Telefono, Biografia = a.Biografia }).ToList<dynamic>();
         }
 
         public void AltaAutor(string nombre, string apellido, string nacionalidad, string email, string telefono, string biografia)
@@ -68,69 +68,51 @@ namespace CLogica.Implementations
             }
         }
 
-        public void ActualizarAutor(string documento, Autor autorActualizar)
+        public void ActualizarAutor(int id, string nombre, string apellido, string nacionalidad, string email, string telefono, string biografia)
         {
-            List<string> camposErroneos = new List<string>();
-            if (string.IsNullOrEmpty(autorActualizar.Persona.Nombre) || !IsValidName(autorActualizar.Persona.Nombre))
-                camposErroneos.Add("Nombre");
-
-            if (string.IsNullOrEmpty(autorActualizar.Persona.Apellido) || !IsValidName(autorActualizar.Persona.Apellido))
-                camposErroneos.Add("Apellido");
-
-            if (string.IsNullOrEmpty(autorActualizar.Persona.Documento) || !IsValidDocumento(autorActualizar.Persona.Documento))
-                camposErroneos.Add("Documento");
-
-            if (string.IsNullOrEmpty(autorActualizar.Persona.Telefono) || !IsValidTelefono(autorActualizar.Persona.Telefono))
-                camposErroneos.Add("Teléfono");
-
-            if (string.IsNullOrEmpty(autorActualizar.Persona.Email) || !IsValidEmail(autorActualizar.Persona.Email))
-                camposErroneos.Add("Email");
-
-            if (string.IsNullOrEmpty(autorActualizar.Biografia) || !IsValidBiografia(autorActualizar.Biografia))
-                camposErroneos.Add("Biografia");
-
-            if (camposErroneos.Count > 0)
-            {
-                throw new ArgumentException("Los siguientes campos son inválidos: ", string.Join(", ", camposErroneos));
-            }
-
-            if (string.IsNullOrEmpty(documento) || !IsValidDocumento(documento))
-                throw new ArgumentException("El documento ingresado es inválido.");
-
-            Autor? autor = _autorRepository.FindByCondition(p => p.Persona.Documento == documento).FirstOrDefault();
+            // Buscamos el autor en la base de datos por su ID
+            Autor? autor = _autorRepository.FindByCondition(a => a.Persona.IdPersona == id).FirstOrDefault();
 
             if (autor == null)
             {
-                throw new ArgumentNullException("No se ha encontrado un autor con ese documento");
+                throw new ArgumentNullException("No se ha encontrado un autor con ese ID.");
             }
 
-            autor.Persona.Nombre = autorActualizar.Persona.Nombre;
-            autor.Persona.Apellido = autorActualizar.Persona.Apellido;
-            autor.Persona.Nacionalidad = autorActualizar.Persona.Nacionalidad;
-            autor.Persona.Documento = autorActualizar.Persona.Documento;
-            autor.Persona.Telefono = autorActualizar.Persona.Telefono;
-            autor.Persona.Email = autorActualizar.Persona.Email;
-            autor.Persona.TipoDocumento = autorActualizar.Persona.TipoDocumento;
-            autor.Biografia = autorActualizar.Biografia;
+            // Actualizamos los campos con los nuevos valores
+            autor.Persona.Nombre = nombre;
+            autor.Persona.Apellido = apellido;
+            autor.Persona.Nacionalidad = nacionalidad;
+            autor.Persona.Email = email;
+            autor.Persona.Telefono = telefono;
+            autor.Biografia = biografia;
 
-            _autorRepository.Create(autor);
+            // Guardamos los cambios en la base de datos
+            _autorRepository.Update(autor);
             _autorRepository.Save();
         }
 
-        public void EliminarAutor(string documento)
+        public void EliminarAutor(string id)
         {
-            if (string.IsNullOrEmpty(documento) || !IsValidDocumento(documento))
+            if (string.IsNullOrEmpty(id))
                 throw new ArgumentException("El documento ingresado es inválido.");
 
-            Autor? autor = _autorRepository.FindByCondition(p => p.Persona.Documento == documento).FirstOrDefault();
+            // Intentamos convertir el 'id' a un entero
+            if (!int.TryParse(id, out int idPersona))
+                throw new ArgumentException("El ID proporcionado no es un número válido.");
+
+            // Buscamos el autor usando el 'idPersona' que ahora es de tipo int
+            Autor? autor = _autorRepository.FindByCondition(p => p.Persona.IdPersona == idPersona).FirstOrDefault();
 
             if (autor == null)
             {
-                throw new ArgumentNullException("No se ha encontrado un autor con ese documento");
+                throw new ArgumentNullException("No se ha encontrado un autor con ese ID");
             }
+
+            // Eliminamos el autor si fue encontrado
             _autorRepository.Delete(autor);
             _autorRepository.Save();
         }
+
 
         #region validaciones
         private bool ContainsInvalidCharacter(string text)
